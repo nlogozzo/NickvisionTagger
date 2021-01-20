@@ -1,0 +1,70 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0-windows10.0.18362.0</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Version>2021.1.0</Version>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\About.png" />
+    <None Remove="Resources\Bug.png" />
+    <None Remove="Resources\Changelog.png" />
+    <None Remove="Resources\CloseFolder.png" />
+    <None Remove="Resources\Dark.png" />
+    <None Remove="Resources\Exit.png" />
+    <None Remove="Resources\icon.ico" />
+    <None Remove="Resources\icon.png" />
+    <None Remove="Resources\Labels.png" />
+    <None Remove="Resources\Light.png" />
+    <None Remove="Resources\OpenFolder.png" />
+    <None Remove="Resources\Reload.png" />
+    <None Remove="Resources\Remove.png" />
+    <None Remove="Resources\Save.png" />
+    <None Remove="Resources\Subfolders.png" />
+    <None Remove="Resources\Tag.png" />
+    <None Remove="Resources\Update.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fluent.Ribbon" Version="8.0.3" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.31" />
+    <PackageReference Include="ModernWpfUI" Version="0.9.3" />
+    <PackageReference Include="TagLibSharp" Version="2.2.0" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <Reference Include="Nickvision.MVVM">
+      <HintPath>Nickvision.MVVM.dll</HintPath>
+    </Reference>
+    <Reference Include="Nickvision.Update">
+      <HintPath>Nickvision.Update.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+	
+  <ItemGroup>
+    <Resource Include="Resources\About.png" />
+    <Resource Include="Resources\Bug.png" />
+    <Resource Include="Resources\Changelog.png" />
+    <Resource Include="Resources\CloseFolder.png" />
+    <Resource Include="Resources\Dark.png" />
+    <Resource Include="Resources\Exit.png" />
+    <Resource Include="Resources\icon.ico" />
+    <Resource Include="Resources\Light.png" />
+    <Resource Include="Resources\OpenFolder.png" />
+    <Resource Include="Resources\Reload.png" />
+    <Resource Include="Resources\Remove.png" />
+    <Resource Include="Resources\Save.png" />
+    <Resource Include="Resources\Subfolders.png" />
+    <Resource Include="Resources\Tag.png" />
+    <Resource Include="Resources\Update.png" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <SplashScreen Include="Resources\icon.png" />
+  </ItemGroup>
+	
+</Project>

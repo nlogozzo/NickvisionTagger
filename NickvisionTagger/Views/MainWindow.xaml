@@ -1,0 +1,166 @@
+﻿<!--
+* "MainWindow.xaml" - Design for MainWindow
+* Copyright (C) 2021 Nicholas Logozzo
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, see <http://www.gnu.org/licenses/>.
+-->
+    
+<Window x:Class="NickvisionTagger.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        xmlns:fluent="urn:fluent-ribbon"
+        xmlns:local="clr-namespace:NickvisionTagger.Views"
+        mc:Ignorable="d" Title="{Binding Title}" Icon="../Resources/icon.ico" ui:WindowHelper.UseModernWindowStyle="True"
+        Width="800" Height="600" WindowState="Maximized">
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Ctrl" Key="O" Command="{Binding OpenMusicFolderCommand}"/>
+        <KeyBinding Modifiers="Ctrl" Key="W" Command="{Binding CloseMusicFolderCommand}"/>
+        <KeyBinding Modifiers="" Key="F5" Command="{Binding ReloadMusicFolderCommand}"/>
+        <KeyBinding Modifiers="Ctrl" Key="S" Command="{Binding SaveTagCommand}"/>
+        <KeyBinding Modifiers="Ctrl" Key="Delete" Command="{Binding RemoveTagCommand}"/>
+        <KeyBinding Modifiers="Ctrl+Shift" Key="F" Command="{Binding FilenameToTagCommand}"/>
+        <KeyBinding Modifiers="Ctrl+Shift" Key="T" Command="{Binding TagToFilenameCommand}"/>
+    </Window.InputBindings>
+
+    <Grid>
+        <fluent:Ribbon HorizontalAlignment="Stretch" VerticalAlignment="Top" FontSize="12" CanMinimize="False">
+            <fluent:Ribbon.Menu>
+                <fluent:Backstage>
+                    <fluent:BackstageTabControl>
+                        <fluent:Button Header="Open Music Folder" Icon="../Resources/OpenFolder.png" ToolTip="Ctrl+O" Command="{Binding OpenMusicFolderCommand}"/>
+                        <fluent:Button Header="Close Music Folder" Icon="../Resources/CloseFolder.png" ToolTip="Ctrl+W" Command="{Binding CloseMusicFolderCommand}"/>
+                        <fluent:SeparatorTabItem/>
+                        <fluent:Button Header="Reload Music Folder" Icon="../Resources/Reload.png" ToolTip="F5" Command="{Binding ReloadMusicFolderCommand}"/>
+                        <fluent:SeparatorTabItem/>
+                        <fluent:Button Header="Exit" Icon="../Resources/Exit.png" ToolTip="Alt+F4" Command="{Binding ExitCommand}"/>
+                    </fluent:BackstageTabControl>
+                </fluent:Backstage>
+            </fluent:Ribbon.Menu>
+
+            <fluent:RibbonTabItem Header="Home">
+                <fluent:RibbonGroupBox Header="Tag">
+                    <fluent:Button Header="Save Tag" LargeIcon="../Resources/Save.png" ToolTip="Ctrl+S" Command="{Binding SaveTagCommand}"/>
+                    <fluent:Button Header="Remove Tag" LargeIcon="../Resources/Remove.png" ToolTip="Ctrl+Delete" Command="{Binding RemoveTagCommand}"/>
+                </fluent:RibbonGroupBox>
+
+                <fluent:RibbonGroupBox Header="Convert">
+                    <fluent:Button Header="Filename To Tag" LargeIcon="../Resources/Tag.png" ToolTip="Ctrl+Shift+F" Command="{Binding FilenameToTagCommand}"/>
+                    <fluent:Button Header="Tag to Filename" LargeIcon="../Resources/Tag.png" ToolTip="Ctrl+Shift+T" Command="{Binding TagToFilenameCommand}"/>
+                </fluent:RibbonGroupBox>
+            </fluent:RibbonTabItem>
+
+            <fluent:RibbonTabItem Header="Settings">
+                <fluent:RibbonGroupBox Header="Music Folder">
+                    <fluent:ToggleButton Header="Include Subfolders" LargeIcon="../Resources/Subfolders.png" IsChecked="{Binding IncludeSubfolders}"/>
+                </fluent:RibbonGroupBox>
+                
+                <fluent:RibbonGroupBox Header="Theme">
+                    <fluent:ToggleButton Header="Light Theme" LargeIcon="../Resources/Light.png" IsChecked="{Binding IsLightTheme}"/>
+                    <fluent:ToggleButton Header="Dark Theme" LargeIcon="../Resources/Dark.png" IsChecked="{Binding IsDarkTheme}"/>
+                </fluent:RibbonGroupBox>
+            </fluent:RibbonTabItem>
+
+            <fluent:RibbonTabItem Header="Help">
+                <fluent:RibbonGroupBox Header="Actions">
+                    <fluent:Button Header="Check For Updates" LargeIcon="../Resources/Update.png" Command="{Binding CheckForUpdatesCommand}"/>
+                    <fluent:Button Header="Report A Bug" LargeIcon="../Resources/Bug.png" Command="{Binding ReportABugCommand}"/>
+                </fluent:RibbonGroupBox>
+
+                <fluent:RibbonGroupBox Header="About">
+                    <fluent:Button Header="Changelog" LargeIcon="../Resources/Changelog.png" Command="{Binding ChangelogCommand}"/>
+                    <fluent:Button Header="About" LargeIcon="../Resources/About.png" Command="{Binding AboutCommand}"/>
+                </fluent:RibbonGroupBox>
+            </fluent:RibbonTabItem>
+        </fluent:Ribbon>
+
+        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,124,0,24">
+            <ScrollViewer HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="330" VerticalScrollBarVisibility="Auto">
+                <Grid>
+                    <TextBox HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,0,0,0" Width="300"
+                         ui:ControlHelper.Header="Filename" ui:ControlHelper.PlaceholderText="Enter filename here" Text="{Binding TagFilename, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding TagFilenameEnabled}"/>
+
+                    <TextBox HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,60,0,0" Width="300"
+                         ui:ControlHelper.Header="Title" ui:ControlHelper.PlaceholderText="Enter title here" Text="{Binding TagTitle, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBox HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,120,0,0" Width="300"
+                         ui:ControlHelper.Header="Artist" ui:ControlHelper.PlaceholderText="Enter artist here" Text="{Binding TagArtist, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBox HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,180,0,0" Width="300"
+                         ui:ControlHelper.Header="Album" ui:ControlHelper.PlaceholderText="Enter album here" Text="{Binding TagAlbum, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <ui:NumberBox HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,240,0,0" Width="300"
+                              ui:ControlHelper.Header="Year" ui:ControlHelper.PlaceholderText="Enter year here" ui:ValidationMode="InvalidInputOverwritten" Value="{Binding TagYear, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding TagYearEnabled}"/>
+
+                    <ui:NumberBox HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,300,0,0" Width="300"
+                              ui:ControlHelper.Header="Track" ui:ControlHelper.PlaceholderText="Enter track here" ui:ValidationMode="InvalidInputOverwritten" Value="{Binding TagTrack, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding TagTrackEnabled}"/>
+
+                    <TextBox HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,360,0,0" Width="300"
+                         ui:ControlHelper.Header="Album Artist" ui:ControlHelper.PlaceholderText="Enter album artist here" Text="{Binding TagAlbumArtist, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBox HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,420,0,0" Width="300"
+                         ui:ControlHelper.Header="Genre" ui:ControlHelper.PlaceholderText="Enter genre here" Text="{Binding TagGenre, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBox HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,480,0,0" Width="300"
+                         ui:ControlHelper.Header="Comment" ui:ControlHelper.PlaceholderText="Enter comment here" Text="{Binding TagComment, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <Label x:Name="lblDuration" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,540,0,0" Content="{Binding TagDuration}"/>
+
+                    <Label x:Name="lblFileSize" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,580,0,0" Content="{Binding TagFileSize}"/>
+                </Grid>
+            </ScrollViewer>
+
+            <DataGrid x:Name="listMusicFiles" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="340,0,0,0" ui:DataGridHelper.UseModernColumnStyles="True"
+                  AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Extended" SelectionUnit="FullRow" GridLinesVisibility="Horizontal" CanUserSortColumns="False"
+                  ItemsSource="{Binding AllMusicFiles}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Filename" Binding="{Binding Filename}"/>
+                    <DataGridTextColumn Header="Title" Binding="{Binding Title}"/>
+                    <DataGridTextColumn Header="Artist" Binding="{Binding Artist}"/>
+                    <DataGridTextColumn Header="Album" Binding="{Binding Album}"/>
+                    <DataGridTextColumn Header="Duration" Binding="{Binding DurationAsString}"/>
+                    <DataGridTextColumn Header="Path" Binding="{Binding Path}"/>
+                </DataGrid.Columns>
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Save Tag" InputGestureText="Ctrl+S" Command="{Binding SaveTagCommand}"/>
+                        <MenuItem Header="Remove Tag" InputGestureText="Ctrl+Delete" Command="{Binding RemoveTagCommand}"/>
+                        <Separator/>
+                        <MenuItem Header="Filename To Tag" InputGestureText="Ctrl+Shift+F" Command="{Binding FilenameToTagCommand}"/>
+                        <MenuItem Header="Tag To Filename" InputGestureText="Ctrl+Shift+T" Command="{Binding TagToFilenameCommand}"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction Command="{Binding SelectedFilesCommand}" CommandParameter="{Binding Path=SelectedItems, ElementName=listMusicFiles}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </DataGrid>
+        </Grid>
+
+        <fluent:StatusBar HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
+            <fluent:StatusBarItem HorizontalAlignment="Left" Margin="4,0,0,0" FontSize="12">
+                <fluent:StatusBarItem.Content>
+                    <TextBlock>
+                        <Run Text="Music Folder: "/>
+                        <Run Text="{Binding CurrentMusicFolder}"/>
+                    </TextBlock>
+                </fluent:StatusBarItem.Content>
+            </fluent:StatusBarItem>
+        </fluent:StatusBar>
+    </Grid>
+</Window>
