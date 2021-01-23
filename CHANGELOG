@@ -1,4 +1,7 @@
 Changelog for Nickvision Tagger
 =====
+V2021.1.1:
+    - Reordered format string list in Filename To Tag and Tag To Filename
+
 V2021.1.0
     - Initial Release

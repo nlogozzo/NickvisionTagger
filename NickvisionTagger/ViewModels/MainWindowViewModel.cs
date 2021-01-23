@@ -64,19 +64,19 @@ namespace NickvisionTagger.ViewModels
         private List<MusicFile> _selectedFiles;
 
         public ObservableCollection<MusicFile> AllMusicFiles => new ObservableCollection<MusicFile>(_musicFolder.Files);
-        public DelegateCommand OpenMusicFolderCommand { get; private set; }
-        public DelegateCommand CloseMusicFolderCommand { get; private set; }
-        public DelegateCommand ReloadMusicFolderCommand { get; private set; }
-        public DelegateCommand ExitCommand { get; private set; }
-        public DelegateAsyncCommand SaveTagCommand { get; private set; }
-        public DelegateAsyncCommand RemoveTagCommand { get; private set; }
-        public DelegateAsyncCommand FilenameToTagCommand { get; private set; }
-        public DelegateAsyncCommand TagToFilenameCommand { get; private set; }
-        public DelegateCommand SelectedFilesCommand { get; private set; }
-        public DelegateAsyncCommand CheckForUpdatesCommand { get; private set; }
-        public DelegateCommand ReportABugCommand { get; private set; }
-        public DelegateAsyncCommand ChangelogCommand { get; private set; }
-        public DelegateAsyncCommand AboutCommand { get; private set; }
+        public DelegateCommand<object> OpenMusicFolderCommand { get; private set; }
+        public DelegateCommand<object> CloseMusicFolderCommand { get; private set; }
+        public DelegateCommand<object> ReloadMusicFolderCommand { get; private set; }
+        public DelegateCommand<object> ExitCommand { get; private set; }
+        public DelegateAsyncCommand<object> SaveTagCommand { get; private set; }
+        public DelegateAsyncCommand<object> RemoveTagCommand { get; private set; }
+        public DelegateAsyncCommand<object> FilenameToTagCommand { get; private set; }
+        public DelegateAsyncCommand<object> TagToFilenameCommand { get; private set; }
+        public DelegateCommand<IList> SelectedFilesCommand { get; private set; }
+        public DelegateAsyncCommand<object> CheckForUpdatesCommand { get; private set; }
+        public DelegateCommand<object> ReportABugCommand { get; private set; }
+        public DelegateAsyncCommand<object> ChangelogCommand { get; private set; }
+        public DelegateAsyncCommand<object> AboutCommand { get; private set; }
 
         /// <summary>
         /// Constructs the viewmodel
@@ -94,19 +94,19 @@ namespace NickvisionTagger.ViewModels
             _comboBoxDialogService = comboBoxDialogService;
             _musicFolder = new MusicFolder("", IncludeSubfolders);
             _selectedFiles = null;
-            OpenMusicFolderCommand = new DelegateCommand(OpenMusicFolder);
-            CloseMusicFolderCommand = new DelegateCommand(CloseMusicFolder);
-            ReloadMusicFolderCommand = new DelegateCommand(ReloadMusicFolder);
-            ExitCommand = new DelegateCommand(Exit);
-            SaveTagCommand = new DelegateAsyncCommand(SaveTag);
-            RemoveTagCommand = new DelegateAsyncCommand(RemoveTag);
-            FilenameToTagCommand = new DelegateAsyncCommand(FilenameToTag);
-            TagToFilenameCommand = new DelegateAsyncCommand(TagToFilename);
-            SelectedFilesCommand = new DelegateCommand(SelectedFiles);
-            CheckForUpdatesCommand = new DelegateAsyncCommand(CheckForUpdates);
-            ReportABugCommand = new DelegateCommand(ReportABug);
-            ChangelogCommand = new DelegateAsyncCommand(Changelog);
-            AboutCommand = new DelegateAsyncCommand(About);
+            OpenMusicFolderCommand = new DelegateCommand<object>(OpenMusicFolder);
+            CloseMusicFolderCommand = new DelegateCommand<object>(CloseMusicFolder);
+            ReloadMusicFolderCommand = new DelegateCommand<object>(ReloadMusicFolder);
+            ExitCommand = new DelegateCommand<object>(Exit);
+            SaveTagCommand = new DelegateAsyncCommand<object>(SaveTag);
+            RemoveTagCommand = new DelegateAsyncCommand<object>(RemoveTag);
+            FilenameToTagCommand = new DelegateAsyncCommand<object>(FilenameToTag);
+            TagToFilenameCommand = new DelegateAsyncCommand<object>(TagToFilename);
+            SelectedFilesCommand = new DelegateCommand<IList>(SelectedFiles);
+            CheckForUpdatesCommand = new DelegateAsyncCommand<object>(CheckForUpdates);
+            ReportABugCommand = new DelegateCommand<object>(ReportABug);
+            ChangelogCommand = new DelegateAsyncCommand<object>(Changelog);
+            AboutCommand = new DelegateAsyncCommand<object>(About);
             TagDuration = "Duration\n00:00:00";
             TagFileSize = "File Size:\n0 MB";
             TagFilenameEnabled = true;
@@ -394,7 +394,7 @@ namespace NickvisionTagger.ViewModels
         {
             if(_selectedFiles != null && _selectedFiles.Count != 0)
             {
-                var formatStrings = new List<string>() { "%title%- %artist%", "%artist%- %title%", "%title%" };
+                var formatStrings = new List<string>() { "%artist%- %title%", "%title%- %artist%", "%title%" };
                 var result = await _comboBoxDialogService.ShowAsync("Select a format string", "Filename To Tag", formatStrings);
                 if(result.SelectedItem != null)
                 {
@@ -411,7 +411,7 @@ namespace NickvisionTagger.ViewModels
         {
             if (_selectedFiles != null && _selectedFiles.Count != 0)
             {
-                var formatStrings = new List<string>() { "%title%- %artist%", "%artist%- %title%", "%title%" };
+                var formatStrings = new List<string>() { "%artist%- %title%", "%title%- %artist%", "%title%" };
                 var result = await _comboBoxDialogService.ShowAsync("Select a format string", "Tag To Filename", formatStrings);
                 if (result.SelectedItem != null)
                 {
@@ -428,110 +428,107 @@ namespace NickvisionTagger.ViewModels
         /// Updates the properties editor based on the selected music files
         /// </summary>
         /// <param name="parameter"></param>
-        public void SelectedFiles(object parameter)
+        public void SelectedFiles(IList selectedItems)
         {
-            if (parameter is IList selectedItems)
+            _selectedFiles = selectedItems.Cast<MusicFile>().ToList();
+            TagFilenameEnabled = true;
+            TagYearEnabled = true;
+            TagTrackEnabled = true;
+            if (_selectedFiles.Count == 0)
             {
-                _selectedFiles = selectedItems.Cast<MusicFile>().ToList();
-                TagFilenameEnabled = true;
-                TagYearEnabled = true;
-                TagTrackEnabled = true;
-                if (_selectedFiles.Count == 0)
+                TagFilename = "";
+                TagTitle = "";
+                TagArtist = "";
+                TagAlbum = "";
+                TagYear = 0;
+                TagTrack = 0;
+                TagAlbumArtist = "";
+                TagGenre = "";
+                TagComment = "";
+                TagDuration = "Duration\n00:00:00";
+                TagFileSize = "File Size:\n0 MB";
+            }
+            else if (_selectedFiles.Count == 1)
+            {
+                var musicFile = _selectedFiles[0];
+                TagFilename = musicFile.Filename;
+                TagTitle = musicFile.Title;
+                TagArtist = musicFile.Artist;
+                TagAlbum = musicFile.Album;
+                TagYear = musicFile.Year;
+                TagTrack = musicFile.Track;
+                TagAlbumArtist = musicFile.AlbumArtist;
+                TagGenre = musicFile.Genre;
+                TagComment = musicFile.Comment;
+                TagDuration = $"Duration:\n{musicFile.DurationAsString}";
+                TagFileSize = $"File Size:\n{musicFile.FileSizeAsString}";
+            }
+            else
+            {
+                var firstMusicFile = _selectedFiles[0];
+                bool haveSameTitle = true;
+                bool haveSameArtist = true;
+                bool haveSameAlbum = true;
+                bool haveSameYear = true;
+                bool haveSameTrack = true;
+                bool haveSameAlbumArtist = true;
+                bool haveSameGenre = true;
+                bool haveSameComment = true;
+                var totalDuration = new TimeSpan();
+                long totalFileSize = 0;
+                foreach (var musicFile in _selectedFiles)
                 {
-                    TagFilename = "";
-                    TagTitle = "";
-                    TagArtist = "";
-                    TagAlbum = "";
-                    TagYear = 0;
-                    TagTrack = 0;
-                    TagAlbumArtist = "";
-                    TagGenre = "";
-                    TagComment = "";
-                    TagDuration = "Duration\n00:00:00";
-                    TagFileSize = "File Size:\n0 MB";
-                }
-                else if (_selectedFiles.Count == 1)
-                {
-                    var musicFile = _selectedFiles[0];
-                    TagFilename = musicFile.Filename;
-                    TagTitle = musicFile.Title;
-                    TagArtist = musicFile.Artist;
-                    TagAlbum = musicFile.Album;
-                    TagYear = musicFile.Year;
-                    TagTrack = musicFile.Track;
-                    TagAlbumArtist = musicFile.AlbumArtist;
-                    TagGenre = musicFile.Genre;
-                    TagComment = musicFile.Comment;
-                    TagDuration = $"Duration:\n{musicFile.DurationAsString}";
-                    TagFileSize = $"File Size:\n{musicFile.FileSizeAsString}";
-                }
-                else
-                {
-                    var firstMusicFile = _selectedFiles[0];
-                    bool haveSameTitle = true;
-                    bool haveSameArtist = true;
-                    bool haveSameAlbum = true;
-                    bool haveSameYear = true;
-                    bool haveSameTrack = true;
-                    bool haveSameAlbumArtist = true;
-                    bool haveSameGenre = true;
-                    bool haveSameComment = true;
-                    var totalDuration = new TimeSpan();
-                    long totalFileSize = 0;
-                    foreach (var musicFile in _selectedFiles)
+                    if (firstMusicFile.Title != musicFile.Title)
                     {
-                        if (firstMusicFile.Title != musicFile.Title)
-                        {
-                            haveSameTitle = false;
-                        }
-                        if (firstMusicFile.Artist != musicFile.Artist)
-                        {
-                            haveSameArtist = false;
-                        }
-                        if (firstMusicFile.Album != musicFile.Album)
-                        {
-                            haveSameAlbum = false;
-                        }
-                        if (firstMusicFile.Year != musicFile.Year)
-                        {
-                            haveSameYear = false;
-                        }
-                        if (firstMusicFile.Track != musicFile.Track)
-                        {
-                            haveSameTrack = false;
-                        }
-                        if (firstMusicFile.AlbumArtist != musicFile.AlbumArtist)
-                        {
-                            haveSameAlbumArtist = false;
-                        }
-                        if (firstMusicFile.Genre != musicFile.Genre)
-                        {
-                            haveSameGenre = false;
-                        }
-                        if (firstMusicFile.Comment != musicFile.Comment)
-                        {
-                            haveSameComment = false;
-                        }
-                        totalDuration += musicFile.Duration;
-                        totalFileSize += musicFile.FileSize;
+                        haveSameTitle = false;
                     }
-                    var totalDurationAsString = totalDuration.DurationToString();
-                    var totalFileSizeAsString = totalFileSize.FileSizeToString();
-                    TagFilenameEnabled = false;
-                    TagFilename = "<keep>";
-                    TagTitle = haveSameTitle ? firstMusicFile.Title : "<keep>";
-                    TagArtist = haveSameArtist ? firstMusicFile.Artist : "<keep>";
-                    TagAlbum = haveSameAlbum ? firstMusicFile.Album : "<keep>";
-                    TagYearEnabled = haveSameYear;
-                    TagYear = haveSameYear ? firstMusicFile.Year : 0;
-                    TagTrackEnabled = haveSameTrack;
-                    TagTrack = haveSameTrack ? firstMusicFile.Track : 0;
-                    TagAlbumArtist = haveSameAlbumArtist ? firstMusicFile.AlbumArtist : "<keep>";
-                    TagGenre = haveSameGenre ? firstMusicFile.Genre : "<keep>";
-                    TagComment = haveSameComment ? firstMusicFile.Comment : "<keep>";
-                    TagDuration = $"Duration:\n{totalDurationAsString}";
-                    TagFileSize = $"File Size:\n{totalFileSizeAsString}";
+                    if (firstMusicFile.Artist != musicFile.Artist)
+                    {
+                        haveSameArtist = false;
+                    }
+                    if (firstMusicFile.Album != musicFile.Album)
+                    {
+                        haveSameAlbum = false;
+                    }
+                    if (firstMusicFile.Year != musicFile.Year)
+                    {
+                        haveSameYear = false;
+                    }
+                    if (firstMusicFile.Track != musicFile.Track)
+                    {
+                        haveSameTrack = false;
+                    }
+                    if (firstMusicFile.AlbumArtist != musicFile.AlbumArtist)
+                    {
+                        haveSameAlbumArtist = false;
+                    }
+                    if (firstMusicFile.Genre != musicFile.Genre)
+                    {
+                        haveSameGenre = false;
+                    }
+                    if (firstMusicFile.Comment != musicFile.Comment)
+                    {
+                        haveSameComment = false;
+                    }
+                    totalDuration += musicFile.Duration;
+                    totalFileSize += musicFile.FileSize;
                 }
+                var totalDurationAsString = totalDuration.DurationToString();
+                var totalFileSizeAsString = totalFileSize.FileSizeToString();
+                TagFilenameEnabled = false;
+                TagFilename = "<keep>";
+                TagTitle = haveSameTitle ? firstMusicFile.Title : "<keep>";
+                TagArtist = haveSameArtist ? firstMusicFile.Artist : "<keep>";
+                TagAlbum = haveSameAlbum ? firstMusicFile.Album : "<keep>";
+                TagYearEnabled = haveSameYear;
+                TagYear = haveSameYear ? firstMusicFile.Year : 0;
+                TagTrackEnabled = haveSameTrack;
+                TagTrack = haveSameTrack ? firstMusicFile.Track : 0;
+                TagAlbumArtist = haveSameAlbumArtist ? firstMusicFile.AlbumArtist : "<keep>";
+                TagGenre = haveSameGenre ? firstMusicFile.Genre : "<keep>";
+                TagComment = haveSameComment ? firstMusicFile.Comment : "<keep>";
+                TagDuration = $"Duration:\n{totalDurationAsString}";
+                TagFileSize = $"File Size:\n{totalFileSizeAsString}";
             }
         }
 
@@ -568,7 +565,7 @@ namespace NickvisionTagger.ViewModels
         /// <summary>
         /// Displays information about this program
         /// </summary>
-        private async Task Changelog(object parameter) => await _contentDialogService.ShowAsync("- Initial Release", "What's New?", "OK");
+        private async Task Changelog(object parameter) => await _contentDialogService.ShowAsync("- Reordered format string list in Filename To Tag and Tag To Filename", "What's New?", "OK");
 
         /// <summary>
         /// Handles when the window closes
