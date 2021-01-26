@@ -48,6 +48,8 @@ namespace NickvisionTagger.Models
         /// Constructs a Config object
         /// </summary>
         /// <param name="isLightTheme">Whether the application is in light theme or not</param>
+        /// <param name="previousMusicFolderPath">The previously opened music folder path</param>
+        /// <param name="includeSubfolders">Include Subfolders</param>
         public Config(bool isLightTheme, string previousMusicFolderPath, bool includeSubfolders)
         {
             IsLightTheme = isLightTheme;
