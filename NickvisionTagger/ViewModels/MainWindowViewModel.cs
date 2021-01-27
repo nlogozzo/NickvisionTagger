@@ -565,7 +565,7 @@ namespace NickvisionTagger.ViewModels
         /// <summary>
         /// Displays information about this program
         /// </summary>
-        private async Task Changelog(object parameter) => await _contentDialogService.ShowAsync("- Reordered format string list in Filename To Tag and Tag To Filename", "What's New?", "OK");
+        private async Task Changelog(object parameter) => await _contentDialogService.ShowAsync("- Updated dependencies", "What's New?", "OK");
 
         /// <summary>
         /// Handles when the window closes
