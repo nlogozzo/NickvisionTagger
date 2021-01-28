@@ -42,10 +42,11 @@ namespace NickvisionTagger.ViewModels
     /// </summary>
     public class MainWindowViewModel : ViewModelBase
     {
-        private IContentDialogService _contentDialogService;
         private INotificationService _notificationService;
+        private IContentDialogService _contentDialogService;
         private IIODialogService _ioDialogService;
         private IComboBoxDialogService _comboBoxDialogService;
+        private IProgressDialogService _progressDialogService;
         private MusicFolder _musicFolder;
         private string _tagFilename;
         private string _tagTitle;
@@ -68,7 +69,7 @@ namespace NickvisionTagger.ViewModels
         public DelegateCommand<object> CloseMusicFolderCommand { get; private set; }
         public DelegateCommand<object> ReloadMusicFolderCommand { get; private set; }
         public DelegateCommand<object> ExitCommand { get; private set; }
-        public DelegateAsyncCommand<object> SaveTagCommand { get; private set; }
+        public DelegateCommand<object> SaveTagCommand { get; private set; }
         public DelegateAsyncCommand<object> RemoveTagCommand { get; private set; }
         public DelegateAsyncCommand<object> FilenameToTagCommand { get; private set; }
         public DelegateAsyncCommand<object> TagToFilenameCommand { get; private set; }
@@ -81,24 +82,27 @@ namespace NickvisionTagger.ViewModels
         /// <summary>
         /// Constructs the viewmodel
         /// </summary>
-        /// <param name="messageBoxService">The IMessageBoxService</param>
         /// <param name="notificationService">The INotificationService</param>
+        /// <param name="contentDialogService">The IContentDialogService</param>
         /// <param name="ioDialogService">The IIODialogService</param>
-        public MainWindowViewModel(IContentDialogService contentDialogService, INotificationService notificationService, IIODialogService ioDialogService, IComboBoxDialogService comboBoxDialogService)
+        /// <param name="comboBoxDialogService">The IComboBoxDialogService</param>
+        /// <param name="progressDialogService">The IProgressDialogService</param>
+        public MainWindowViewModel(INotificationService notificationService, IContentDialogService contentDialogService, IIODialogService ioDialogService, IComboBoxDialogService comboBoxDialogService, IProgressDialogService progressDialogService)
         {
             Title = "Nickvision Tagger";
             ControlzEx.Theming.ThemeManager.Current.ChangeThemeColorScheme(Application.Current, "Orange");
-            _contentDialogService = contentDialogService;
             _notificationService = notificationService;
+            _contentDialogService = contentDialogService;
             _ioDialogService = ioDialogService;
             _comboBoxDialogService = comboBoxDialogService;
+            _progressDialogService = progressDialogService;
             _musicFolder = new MusicFolder("", IncludeSubfolders);
             _selectedFiles = null;
             OpenMusicFolderCommand = new DelegateCommand<object>(OpenMusicFolder);
             CloseMusicFolderCommand = new DelegateCommand<object>(CloseMusicFolder);
             ReloadMusicFolderCommand = new DelegateCommand<object>(ReloadMusicFolder);
             ExitCommand = new DelegateCommand<object>(Exit);
-            SaveTagCommand = new DelegateAsyncCommand<object>(SaveTag);
+            SaveTagCommand = new DelegateCommand<object>(SaveTag);
             RemoveTagCommand = new DelegateAsyncCommand<object>(RemoveTag);
             FilenameToTagCommand = new DelegateAsyncCommand<object>(FilenameToTag);
             TagToFilenameCommand = new DelegateAsyncCommand<object>(TagToFilename);
@@ -342,30 +346,33 @@ namespace NickvisionTagger.ViewModels
         /// Saves the tags of the selected music files
         /// </summary>
         /// <param name="parameter"></param>
-        public async Task SaveTag(object parameter)
+        public void SaveTag(object parameter)
         {
             if (_selectedFiles != null)
             {
-                foreach (var musicFile in _selectedFiles)
+                _progressDialogService.ShowDialog("Saving tags...", async () =>
                 {
-                    if (string.IsNullOrEmpty(TagFilename))
+                    foreach (var musicFile in _selectedFiles)
                     {
-                        continue;
+                        if (string.IsNullOrEmpty(TagFilename))
+                        {
+                            continue;
+                        }
+                        if (musicFile.Filename != TagFilename && TagFilenameEnabled)
+                        {
+                            musicFile.Filename = TagFilename;
+                        }
+                        musicFile.Title = TagTitle == "<keep>" ? musicFile.Title : TagTitle;
+                        musicFile.Artist = TagArtist == "<keep>" ? musicFile.Artist : TagArtist;
+                        musicFile.Album = TagAlbum == "<keep>" ? musicFile.Album : TagAlbum;
+                        musicFile.Year = !TagYearEnabled ? musicFile.Year : (uint)TagYear;
+                        musicFile.Track = !TagTrackEnabled ? musicFile.Track : (uint)TagTrack;
+                        musicFile.AlbumArtist = TagAlbumArtist == "<keep>" ? musicFile.AlbumArtist : TagAlbumArtist;
+                        musicFile.Genre = TagGenre == "<keep>" ? musicFile.Genre : TagGenre;
+                        musicFile.Comment = TagComment == "<keep>" ? musicFile.Comment : TagComment;
+                        await Task.Run(() => musicFile.Save());
                     }
-                    if (musicFile.Filename != TagFilename && TagFilenameEnabled)
-                    {
-                        musicFile.Filename = TagFilename;
-                    }
-                    musicFile.Title = TagTitle == "<keep>" ? musicFile.Title : TagTitle;
-                    musicFile.Artist = TagArtist == "<keep>" ? musicFile.Artist : TagArtist;
-                    musicFile.Album = TagAlbum == "<keep>" ? musicFile.Album : TagAlbum;
-                    musicFile.Year = !TagYearEnabled ? musicFile.Year : (uint)TagYear;
-                    musicFile.Track = !TagTrackEnabled ? musicFile.Track : (uint)TagTrack;
-                    musicFile.AlbumArtist = TagAlbumArtist == "<keep>" ? musicFile.AlbumArtist : TagAlbumArtist;
-                    musicFile.Genre = TagGenre == "<keep>" ? musicFile.Genre : TagGenre;
-                    musicFile.Comment = TagComment == "<keep>" ? musicFile.Comment : TagComment;
-                    await Task.Run(() => musicFile.Save());
-                }
+                });
                 ReloadMusicFolder(null);
             }
         }
@@ -381,10 +388,13 @@ namespace NickvisionTagger.ViewModels
                 var result = await _contentDialogService.ShowAsync($"Are you sure you want to remove {_selectedFiles.Count} tag(s)?", "Remove Tag(s)?", "No", "Yes");
                 if (result == ContentDialogResult.Primary)
                 {
-                    foreach (var musicFile in _selectedFiles)
+                    _progressDialogService.ShowDialog("Removing tags...", async () =>
                     {
-                        await Task.Run(() => musicFile.RemoveTag());
-                    }
+                        foreach (var musicFile in _selectedFiles)
+                        {
+                            await Task.Run(() => musicFile.RemoveTag());
+                        }
+                    });
                     ReloadMusicFolder(null);
                 }
             }
@@ -398,10 +408,13 @@ namespace NickvisionTagger.ViewModels
                 var result = await _comboBoxDialogService.ShowAsync("Select a format string", "Filename To Tag", formatStrings);
                 if(result.SelectedItem != null)
                 {
-                    foreach (var musicFile in _selectedFiles)
+                    _progressDialogService.ShowDialog("Converting tags...", async () =>
                     {
-                        await Task.Run(() => musicFile.FilenameToTag(result.SelectedItem));
-                    }
+                        foreach (var musicFile in _selectedFiles)
+                        {
+                            await Task.Run(() => musicFile.FilenameToTag(result.SelectedItem));
+                        }
+                    });
                     ReloadMusicFolder(null);
                 }
             }
@@ -415,10 +428,13 @@ namespace NickvisionTagger.ViewModels
                 var result = await _comboBoxDialogService.ShowAsync("Select a format string", "Tag To Filename", formatStrings);
                 if (result.SelectedItem != null)
                 {
-                    foreach (var musicFile in _selectedFiles)
+                    _progressDialogService.ShowDialog("Converting filenames...", async () =>
                     {
-                        await Task.Run(() => musicFile.TagToFilename(result.SelectedItem));
-                    }
+                        foreach (var musicFile in _selectedFiles)
+                        {
+                            await Task.Run(() => musicFile.TagToFilename(result.SelectedItem));
+                        }
+                    });
                     ReloadMusicFolder(null);
                 }
             }
@@ -544,7 +560,8 @@ namespace NickvisionTagger.ViewModels
                 var result = await _contentDialogService.ShowAsync($"An update is available V{updater.LatestVersion}. Would you like to update?\nIf yes, Nickvision Tagger will attempt to download the installer and will close the application to update. Please make sure all work is saved", "Update Available", "No", "Yes");
                 if (result == ContentDialogResult.Primary)
                 {
-                    var updateSuccessful = await updater.Update();
+                    var updateSuccessful = false;
+                    _progressDialogService.ShowDialog("Downloading the update...", async () => updateSuccessful = await updater.Update());
                     if (!updateSuccessful)
                     {
                         await _notificationService.Send("Update failed. Please try again later", "Update Failed", SystemIcons.Application);
@@ -565,7 +582,7 @@ namespace NickvisionTagger.ViewModels
         /// <summary>
         /// Displays information about this program
         /// </summary>
-        private async Task Changelog(object parameter) => await _contentDialogService.ShowAsync("- Updated dependencies", "What's New?", "OK");
+        private async Task Changelog(object parameter) => await _contentDialogService.ShowAsync("- Added progress dialog for extra long tasks", "What's New?", "OK");
 
         /// <summary>
         /// Handles when the window closes

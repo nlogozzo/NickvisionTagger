@@ -16,8 +16,7 @@
 * along with this program; if not, see <http://www.gnu.org/licenses/>.
 ****/
 
-using Microsoft.Extensions.DependencyInjection;
-using Nickvision.MVVM.Services;
+using Nickvision.MVVM;
 using NickvisionTagger.ViewModels;
 using NickvisionTagger.Views;
 using System.Windows;
@@ -32,15 +31,10 @@ namespace NickvisionTagger
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            var serviceCollection = new ServiceCollection();
-            serviceCollection.AddTransient<IContentDialogService, ContentDialogService>();
-            serviceCollection.AddTransient<INotificationService, BalloonNotificationService>();
-            serviceCollection.AddTransient<IIODialogService, IODialogService>();
-            serviceCollection.AddTransient<IComboBoxDialogService, ComboBoxDialogService>();
-            serviceCollection.AddTransient<MainWindowViewModel>();
-            var provider = serviceCollection.BuildServiceProvider();
+            var dependencyInjector = new DependencyInjector();
+            dependencyInjector.AddViewModel<MainWindowViewModel>();
             var mainWindow = new MainWindow();
-            mainWindow.DataContext = provider.GetRequiredService<MainWindowViewModel>();
+            mainWindow.DataContext = dependencyInjector.GetService<MainWindowViewModel>();
             mainWindow.Show();
         }
     }

@@ -1,5 +1,11 @@
 Changelog for Nickvision Tagger
 =====
+V2021.1.3:
+    - Added progress dialog for extra long tasks
+
+V2021.1.2:
+    - Updated dependencies
+
 V2021.1.1:
     - Reordered format string list in Filename To Tag and Tag To Filename
 
