@@ -1,5 +1,8 @@
 Changelog for Nickvision Tagger
 =====
+V2021.1.4:
+    - Added progress dialog for loading music files
+
 V2021.1.3:
     - Added progress dialog for extra long tasks
 

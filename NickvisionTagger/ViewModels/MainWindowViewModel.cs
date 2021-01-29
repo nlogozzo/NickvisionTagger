@@ -126,7 +126,7 @@ namespace NickvisionTagger.ViewModels
             set
             {
                 _musicFolder.IncludeSubfolders = value;
-                _musicFolder.ReloadFiles();
+                _progressDialogService.ShowDialog("Loading music files...", async () => await Task.Run(() => _musicFolder.ReloadFiles()));
                 OnPropertyChanged();
                 OnPropertyChanged("AllMusicFiles");
                 UpdateConfig();
@@ -140,7 +140,7 @@ namespace NickvisionTagger.ViewModels
             set
             {
                 _musicFolder.FolderPath = value == "No Folder Open" ? "" : value;
-                _musicFolder.ReloadFiles();
+                _progressDialogService.ShowDialog("Loading music files...", async () => await Task.Run(() => _musicFolder.ReloadFiles()));
                 OnPropertyChanged();
                 OnPropertyChanged("AllMusicFiles");
                 UpdateConfig();
@@ -582,7 +582,7 @@ namespace NickvisionTagger.ViewModels
         /// <summary>
         /// Displays information about this program
         /// </summary>
-        private async Task Changelog(object parameter) => await _contentDialogService.ShowAsync("- Added progress dialog for extra long tasks", "What's New?", "OK");
+        private async Task Changelog(object parameter) => await _contentDialogService.ShowAsync("- Added progress dialog for loading music files", "What's New?", "OK");
 
         /// <summary>
         /// Handles when the window closes
